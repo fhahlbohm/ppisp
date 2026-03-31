@@ -61,7 +61,14 @@ __global__ void ppisp_kernel(int batch_size, int num_cameras, int num_frames,
 
     // 2. Vignetting correction
     if (camera_idx != -1) {
-        apply_vignetting(rgb, &vignetting_params[camera_idx * 3], pixel_coords[tid],
+        float2 pixel_coord;
+        if (pixel_coords != nullptr) {
+            pixel_coord = pixel_coords[tid];
+        } else {
+            pixel_coord = make_float2(float(tid % resolution_x) + 0.5f,
+                                      float(tid / resolution_x) + 0.5f);
+        }
+        apply_vignetting(rgb, &vignetting_params[camera_idx * 3], pixel_coord,
                          (float)resolution_x, (float)resolution_y, rgb);
     }
 
@@ -108,7 +115,17 @@ __global__ void ppisp_bwd_kernel(
     if (tid < batch_size) {
         // Load input
         float3 rgb_input = rgb_in[tid];
-        float2 pixel_coord = pixel_coords[tid];
+
+        // Load or compute pixel coordinate if needed
+        float2 pixel_coord;
+        if (camera_idx != -1) {
+            if (pixel_coords != nullptr) {
+                pixel_coord = pixel_coords[tid];
+            } else {
+                pixel_coord = make_float2(float(tid % resolution_x) + 0.5f,
+                                          float(tid / resolution_x) + 0.5f);
+            }
+        }
 
         // Recompute forward pass using separate output variables to avoid aliasing
         float3 rgb = rgb_input;
