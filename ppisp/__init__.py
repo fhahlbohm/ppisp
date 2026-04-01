@@ -610,17 +610,20 @@ class PPISP(nn.Module):
         Returns:
             Processed RGB [H, W, 3] or [N, 3] - same shape as rgb
         """
+        if resolution is None or pixel_coords is None:
+            assert rgb.dim() == 3, (
+                f"resolution and pixel_coords can only be inferred from [H, W, 3] input (got shape {rgb.shape})"
+            )
+
         if resolution is None:
-            assert rgb.dim() == 3, f"Unable to infer resolution from rgb input (shape {rgb.shape})"
             resolution_w, resolution_h = rgb.shape[1], rgb.shape[0]
         else:
             resolution_w, resolution_h = resolution
-
-        if pixel_coords is None:
-            assert rgb.dim() == 3, f"Unable to infer pixel coords from rgb input (shape {rgb.shape})"
-            assert resolution_w == rgb.shape[1] and resolution_h == rgb.shape[0], (
-                f"Pixel coords can only be inferred when rgb input has shape [H, W, 3] (got {rgb.shape})"
-            )
+            if pixel_coords is None:
+                assert resolution_w == rgb.shape[1] and resolution_h == rgb.shape[0], (
+                    f"Explicit resolution ({resolution_w}x{resolution_h}) must match "
+                    f"rgb shape ({rgb.shape[1]}x{rgb.shape[0]}) when pixel_coords is None"
+                )
 
         # Normalize indices: Tensor/int/None -> int (-1 for None)
         camera_idx_int = _normalize_index(camera_idx, "camera_idx")

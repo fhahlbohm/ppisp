@@ -18,8 +18,8 @@
 #ifndef _PPISP_BINDINGS_H_INC
 #define _PPISP_BINDINGS_H_INC
 
-#include <torch/extension.h>
 #include <pybind11/optional.h>
+#include <torch/extension.h>
 
 // =============================================================================
 // Forward pass for PPISP image processing
@@ -62,12 +62,12 @@ void ppisp_backward(
 // PyTorch tensor wrappers
 // =============================================================================
 
-torch::Tensor ppisp_forward_tensor(torch::Tensor exposure_params,             // [num_frames]
-                                   torch::Tensor vignetting_params,           // [num_cameras, 3, 5]
-                                   torch::Tensor color_params,                // [num_frames, 8]
-                                   torch::Tensor crf_params,                  // [num_cameras, 3, 4]
-                                   torch::Tensor rgb_in,                      // [num_pixels, 3]
-                                   c10::optional<torch::Tensor> pixel_coords, // [num_pixels, 2]
+torch::Tensor ppisp_forward_tensor(torch::Tensor exposure_params,    // [num_frames]
+                                   torch::Tensor vignetting_params,  // [num_cameras, 3, 5]
+                                   torch::Tensor color_params,       // [num_frames, 8]
+                                   torch::Tensor crf_params,         // [num_cameras, 3, 4]
+                                   torch::Tensor rgb_in,             // [num_pixels, 3]
+                                   c10::optional<torch::Tensor> pixel_coords,  // [num_pixels, 2]
                                    int resolution_w, int resolution_h, int camera_idx,
                                    int frame_idx) {
     int num_pixels = rgb_in.size(0);
@@ -79,9 +79,8 @@ torch::Tensor ppisp_forward_tensor(torch::Tensor exposure_params,             //
     ppisp_forward(exposure_params.data_ptr<float>(), vignetting_params.data_ptr<float>(),
                   color_params.data_ptr<float>(), crf_params.data_ptr<float>(),
                   rgb_in.data_ptr<float>(), rgb_out.data_ptr<float>(),
-                  pixel_coords.has_value() ? pixel_coords->data_ptr<float>() : nullptr,
-                  num_pixels, num_cameras, num_frames, resolution_w, resolution_h,
-                  camera_idx, frame_idx);
+                  pixel_coords.has_value() ? pixel_coords->data_ptr<float>() : nullptr, num_pixels,
+                  num_cameras, num_frames, resolution_w, resolution_h, camera_idx, frame_idx);
 
     return rgb_out;
 }
@@ -108,9 +107,8 @@ ppisp_backward_tensor(torch::Tensor exposure_params, torch::Tensor vignetting_pa
                    pixel_coords.has_value() ? pixel_coords->data_ptr<float>() : nullptr,
                    v_rgb_out.data_ptr<float>(), v_exposure_params.data_ptr<float>(),
                    v_vignetting_params.data_ptr<float>(), v_color_params.data_ptr<float>(),
-                   v_crf_params.data_ptr<float>(), v_rgb_in.data_ptr<float>(),
-                   num_pixels, num_cameras, num_frames, resolution_w, resolution_h,
-                   camera_idx, frame_idx);
+                   v_crf_params.data_ptr<float>(), v_rgb_in.data_ptr<float>(), num_pixels,
+                   num_cameras, num_frames, resolution_w, resolution_h, camera_idx, frame_idx);
 
     return std::make_tuple(v_exposure_params, v_vignetting_params, v_color_params, v_crf_params,
                            v_rgb_in);

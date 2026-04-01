@@ -65,11 +65,11 @@ __global__ void ppisp_kernel(int batch_size, int num_cameras, int num_frames,
         if (pixel_coords != nullptr) {
             pixel_coord = pixel_coords[tid];
         } else {
-            pixel_coord = make_float2(float(tid % resolution_x) + 0.5f,
-                                      float(tid / resolution_x) + 0.5f);
+            pixel_coord =
+                make_float2(float(tid % resolution_x) + 0.5f, float(tid / resolution_x) + 0.5f);
         }
-        apply_vignetting(rgb, &vignetting_params[camera_idx * 3], pixel_coord,
-                         (float)resolution_x, (float)resolution_y, rgb);
+        apply_vignetting(rgb, &vignetting_params[camera_idx * 3], pixel_coord, (float)resolution_x,
+                         (float)resolution_y, rgb);
     }
 
     // 3. Color correction (homography)
@@ -117,13 +117,13 @@ __global__ void ppisp_bwd_kernel(
         float3 rgb_input = rgb_in[tid];
 
         // Load or compute pixel coordinate if needed
-        float2 pixel_coord;
+        float2 pixel_coord = {0.f, 0.f};
         if (camera_idx != -1) {
             if (pixel_coords != nullptr) {
                 pixel_coord = pixel_coords[tid];
             } else {
-                pixel_coord = make_float2(float(tid % resolution_x) + 0.5f,
-                                          float(tid / resolution_x) + 0.5f);
+                pixel_coord =
+                    make_float2(float(tid % resolution_x) + 0.5f, float(tid / resolution_x) + 0.5f);
             }
         }
 
